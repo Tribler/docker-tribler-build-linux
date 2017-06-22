@@ -15,14 +15,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python-setuptools \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /root
+RUN mkdir -p /root/code/bin
+WORKDIR /root/code
 
-RUN git clone --recursive https://github.com/Tribler/tribler.git
+ENV REPO_URL=https://github.com/Tribler/tribler.git
+RUN git clone --recursive ${REPO_URL} tribler
 
-WORKDIR /root/tribler
+WORKDIR /root/code/tribler
 
-RUN python Tribler/Main/Build/update_version_from_git.py
-RUN debuild -i -us -uc -b
+ENV VERSION=next
+RUN git checkout ${VERSION}
 
-
-CMD ["bash"]
+CMD /usr/bin/debuild -i -us -uc -b && mv ../tribler_* ../bin/
